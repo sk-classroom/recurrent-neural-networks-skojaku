@@ -1,0 +1,6 @@
+[alias]
+    s = status
+    ch = checkout
+    co = commit -m
+    pu = push
+    u = !git add -u

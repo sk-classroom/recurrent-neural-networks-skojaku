@@ -1,0 +1,28 @@
+{
+	"image": "mcr.microsoft.com/devcontainers/universal:2",
+	"hostRequirements": {
+	  "cpus": 2
+	},
+	"waitFor": "onCreateCommand",
+	"updateContentCommand": "python3 -m pip install -r requirements.txt",
+	"postCreateCommand": "",
+	"customizations": {
+	  "codespaces": {
+		"openFiles": []
+	  },
+	  "vscode": {
+		"extensions": [
+		  "ms-toolsai.jupyter",
+		  "ms-python.python",
+		  "ms-python.vscode-pylance",
+		  "ms-python.black-formatter"
+		],
+		"settings": {
+			"python.linting.enabled": true,
+			"python.linting.flake8Enabled": true,
+			"editor.formatOnSave": true,
+			"editor.formatOnType": true
+		},
+	  }
+	}
+  }
