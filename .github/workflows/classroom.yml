@@ -1,0 +1,41 @@
+name: Autograding Tests
+'on':
+- push
+- workflow_dispatch
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Test RNN
+      id: test-rnn
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test RNN
+        setup-command: pip install -r requirements.txt
+        command: python tests/test.py TestRNN
+        timeout: 10
+        max-score: 10
+    - name: Test LSTM
+      id: test-lstm
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test LSTM
+        setup-command: ''
+        command: python tests/test.py TestLSTM
+        timeout: 10
+        max-score: 10
+    - name: Autograding Reporter
+      uses: education/autograding-grading-reporter@v1
+      env:
+        TEST-RNN_RESULTS: "${{steps.test-rnn.outputs.result}}"
+        TEST-LSTM_RESULTS: "${{steps.test-lstm.outputs.result}}"
+      with:
+        runners: test-rnn,test-lstm
