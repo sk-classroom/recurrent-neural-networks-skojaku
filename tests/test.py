@@ -10,7 +10,7 @@ from scipy import stats
 class TestRNN(unittest.TestCase):
 
     def setUp(self):
-        self.root = ".."
+        self.root = "."
 
     def test_rnn_loss(self):
 
@@ -48,7 +48,9 @@ class TestLSTM(unittest.TestCase):
             predictions = fp.read()
         predictions = list(predictions)
 
-        with open("../data/the-foundation-test.txt", "r", encoding="utf8") as fp:
+        with open(
+            f"{self.root}/data/the-foundation-test.txt", "r", encoding="utf8"
+        ) as fp:
             eval_text = fp.read()
 
         eval_text = eval_text.replace("\n", " ")
