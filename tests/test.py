@@ -4,96 +4,70 @@ import numpy as np
 import sys
 import pandas as pd
 
-sys.path.append("assignments/")
-from assignment import *
 from scipy import stats
-from sklearn.svm import SVC
-from sklearn.decomposition import PCA
-from sklearn.cluster import KMeans
-from sklearn.metrics import normalized_mutual_info_score
-from sklearn.datasets import make_blobs
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
 
-class TestDimensionalityReduction(unittest.TestCase):
+class TestRNN(unittest.TestCase):
+
     def setUp(self):
+        self.root = ".."
 
-        self.X, self.y = make_blobs(
-            n_samples=100, centers=3, n_features=3, random_state=42
-        )
+    def test_rnn_loss(self):
 
-    def test_pca_fit_transform(self):
-        pca = PrincipalComponentAnalysis(n_components=2)
-        pca.fit(self.X)
-        X_transformed = pca.transform(self.X)
+        df = pd.read_csv(f"{self.root}/assignments/rnn_loss_values.csv")
+        loss_values = df["0"].values.reshape(-1)
+        # Check if the loss is decreasing
+        rho = stats.pearsonr(loss_values, np.arange(len(loss_values)))[0]
+        self.assertTrue(rho < 0)
 
-        explained_variance = np.trace(np.cov(X_transformed.T)) / np.trace(
-            np.cov(self.X.T)
-        )
-        assert (
-            explained_variance > 0.9
-        ), "the explained variance should be greater than 0.9"
-        self.assertEqual(X_transformed.shape, (100, 2))
-
-        assert np.all(
-            X_transformed.mean(axis=0) < 1e-5
-        ), "The projected data must have zero mean. It's likely that you forgot to center the data before projection"
-        self.assertEqual(X_transformed.shape, (100, 2))
-
-    def test_lda_fit_transform(self):
-        lda = LinearDiscriminantAnalysis(n_components=2)
-        lda.fit(self.X, self.y)
-        X_transformed = lda.transform(self.X)
-
-        model = SVC().fit(X_transformed, self.y)
-        score = model.score(X_transformed, self.y)
-        assert score > 0.9, "the class must be clealry separated"
-        assert np.all(
-            X_transformed.mean(axis=0) < 1e-5
-        ), "The projected data must have zero mean. It's likely that you forgot to center the data before projection"
-        self.assertEqual(X_transformed.shape, (100, 2))
+    def test_rnn_prediction(self):
+        df = pd.read_csv(f"{self.root}/assignments/rnn_test_predictions.csv")
+        predictions = df["0"].values.reshape(-1)
+        y = pd.read_csv(f"{self.root}/data/test.csv")["country"].values
+        acc = np.mean(predictions == y)
+        self.assertTrue(acc > 1.0 / 52)
 
 
-class TestAdversarialExample(unittest.TestCase):
+class TestLSTM(unittest.TestCase):
+
     def setUp(self):
-        self.n_samples = 1000
-        self.n_features = 3
+        self.root = ".."
 
-    def test_pca_adversarial_example(self):
+    def test_lstm_loss(self):
 
-        dataset = AdversarialExamples()
+        df = pd.read_csv(f"{self.root}/assignments/lstm_loss_values.csv")
+        loss_values = df["0"].values.reshape(-1)
+        # Check if the loss is decreasing
+        rho = stats.pearsonr(loss_values, np.arange(len(loss_values)))[0]
+        self.assertTrue(rho < 0)
 
-        min_score = 0.5
+    def test_lstm_prediction(self):
+        with open(
+            f"{self.root}/assignments/lstm_test_predictions.txt", "r", encoding="utf8"
+        ) as fp:
+            predictions = fp.read()
+        predictions = list(predictions)
 
-        for i in range(10):
-            X, y = dataset.pca_adversarial_data(
-                n_samples=self.n_samples, n_features=self.n_features
-            )
-            pca = PCA(n_components=1)
-            X_transformed = pca.fit_transform(X)
+        with open("../data/the-foundation-test.txt", "r", encoding="utf8") as fp:
+            eval_text = fp.read()
 
-            k = np.max(y + 1)
-            model = KMeans(n_clusters=int(k))
-            model.fit(X)
-            y_pred = model.predict(X)
+        eval_text = eval_text.replace("\n", " ")
+        eval_text = eval_text.replace("\r", " ")
 
-            model = KMeans(n_clusters=int(k))
-            model.fit(X_transformed)
-            y_pred_transformed = model.predict(X_transformed)
+        _, targets = seq2input_target(eval_text, window_length=30)
 
-            score = normalized_mutual_info_score(y, y_pred)
-            score_transformed = normalized_mutual_info_score(y, y_pred_transformed)
+        acc = np.mean(predictions == np.array(targets))
+        rand_acc = 0.0120
 
-            if score > 0.99 and score_transformed < min_score:
-                break
+        self.assertTrue(acc > rand_acc)
 
-        assert (
-            score > 0.99
-        ), f"The generated data does not have well-separated clusters. separability = (original: {score}, pca: {score_transformed})"
 
-        assert (
-            score_transformed < min_score
-        ), f"The clusters should not be separable in the PCA projection. separability = (original: {score}, pca: {score_transformed})"
+def seq2input_target(seq, window_length):
+    input_text = [
+        list(seq[i : i + window_length]) for i in range(len(seq) - window_length)
+    ]
+    target_text = list(seq[window_length:])
+    return input_text, target_text
 
 
 if __name__ == "__main__":
