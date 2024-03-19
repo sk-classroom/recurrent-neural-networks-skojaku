@@ -1,22 +1,10 @@
-# Mechanics of PyTorch
+# Recurrent Neural Networks
 
 # Task
 
-1. Do `exercise/excercise_0*.ipynb` by following the instruction in the comment out. They are not grading items. So feel free to change as you wish.
-
-2. There is no assignment for this module!
-
-# Installation of PyTorch
-
-PyTorch can be installed using pip or conda. The commands below will install the CPU version of PyTorch. If you need the GPU version, visit the PyTorch website for more specific installation instructions.
-
-## Using pip
-
-You can install PyTorch using pip with the following command:
-
-```bash
-pip install torch torchvision torchaudio
-```
+1. Complete the notebooks "assignments/assignment_01.ipynb" and "assignments/assignment_02.ipynb".
+2. Generate the files as instructed in the notebooks
+3. Submit the files by git add & git commit & git push the files.
 
 # FAQ
 
